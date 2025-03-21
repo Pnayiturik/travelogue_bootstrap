@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travelogue - Create Account</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    /* Your existing CSS styles remain unchanged */
+    :root {
+      --primary-color: #0d6efd;
+      --primary-dark: #0b5ed7;
+      --primary-light: #e8f0fe;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .register-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .register-image {
+      background-image: url('https://source.unsplash.com/random/1200x800/?adventure');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      min-height: 100%;
+    }
+
+    .register-image::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(13, 110, 253, 0.8) 0%, rgba(11, 94, 215, 0.7) 100%);
+    }
+
+    .register-image-content {
+      position: relative;
+      z-index: 1;
+      padding: 3rem;
+      color: white;
+    }
+
+    .register-form {
+      padding: 3rem;
+      background-color: white;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.6rem 1.5rem;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .input-group-text {
+      background-color: var(--primary-light);
+      border-color: #ced4da;
+      color: var(--primary-color);
+    }
+
+    .register-divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+    }
+
+    .register-divider::before,
+    .register-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .register-divider span {
+      padding: 0 1rem;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .social-register {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .social-register-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      color: #6c757d;
+      transition: all 0.2s ease;
+    }
+
+    .social-register-btn:hover {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .feature-list {
+      margin-top: 2rem;
+    }
+
+    .feature-item {
+      margin-bottom: 1rem;
+    }
+
+    .password-requirements {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-top: 0.5rem;
+    }
+
+    .password-requirement {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .password-requirement i {
+      margin-right: 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 767.98px) {
+      .register-image {
+        min-height: 250px;
+      }
+      
+      .register-form {
+        padding: 2rem;
+      }
+      
+      .register-image-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Custom Toast Styles */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+    }
+
+    .toast {
+      background-color: var(--primary-light);
+      border: 1px solid var(--primary-color);
+      color: var(--primary-dark);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .toast-header {
+      background-color: var(--primary-light);
+      border-bottom: 1px solid var(--primary-color);
+      color: var(--primary-dark);
+      font-weight: 500;
+    }
+
+    .toast-body {
+      padding: 1rem;
+    }
+
+    .toast-success {
+      background-color: #d1e7dd;
+      border-color: #badbcc;
+      color: #0f5132;
+    }
+
+    .toast-error {
+      background-color: #f8d7da;
+      border-color: #f5c2c7;
+      color: #842029;
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast Container -->
+  <div class="toast-container">
+    <!-- Toast for Success/Error Messages -->
+    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <strong class="me-auto">Notification</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body"></div>
+    </div>
+  </div>
+
+  <div class="container d-flex align-items-center justify-content-center min-vh-100 py-5">
+    <div class="register-container row g-0 w-100">
+      <!-- Left side - Image -->
+      <div class="col-md-6">
+        <div class="register-image d-flex align-items-center">
+          <div class="register-image-content">
+            <h2 class="fw-bold mb-4">Join Travelogue Today</h2>
+            <p class="mb-4">Create your account and start planning your next adventure with our all-in-one travel platform.</p>
+            
+            <div class="feature-list">
+              <div class="feature-item d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Discover and save amazing destinations</span>
+              </div>
+              <div class="feature-item d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Create detailed travel itineraries</span>
+              </div>
+              <div class="feature-item d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Track expenses and manage budgets</span>
+              </div>
+              <div class="feature-item d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Share experiences with fellow travelers</span>
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <p class="mb-0">Already have an account? <a href="login.html" class="text-white fw-bold">Sign in</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right side - Form -->
+      <div class="col-md-6">
+        <div class="register-form">
+          <div class="text-center mb-4">
+            <img src="logo.png" alt="Travelogue Logo" height="40" class="mb-3">
+            <h3 class="fw-bold">Create Your Account</h3>
+            <p class="text-muted">Fill in your details to get started</p>
+          </div>
+          
+          <form id="registrationForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="firstName" class="form-label">First Name</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person"></i></span>
+                  <input type="text" class="form-control" id="firstName" placeholder="John" required>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="lastName" class="form-label">Last Name</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person"></i></span>
+                  <input type="text" class="form-control" id="lastName" placeholder="Doe" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3 mt-3">
+              <label for="email" class="form-label">Email address</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" id="email" placeholder="name@example.com" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Create Password</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control" id="password" placeholder="Create a strong password" required>
+                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <div class="password-requirements mt-2">
+                <p class="mb-1">Password must contain:</p>
+                <div class="password-requirement">
+                  <i class="bi bi-circle"></i>
+                  <span>At least 8 characters</span>
+                </div>
+                <div class="password-requirement">
+                  <i class="bi bi-circle"></i>
+                  <span>At least one uppercase letter</span>
+                </div>
+                <div class="password-requirement">
+                  <i class="bi bi-circle"></i>
+                  <span>At least one number</span>
+                </div>
+                <div class="password-requirement">
+                  <i class="bi bi-circle"></i>
+                  <span>At least one special character</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm Password</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password" required>
+              </div>
+            </div>
+            
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="termsAgree" required>
+              <label class="form-check-label" for="termsAgree">
+                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+              </label>
+            </div>
+            
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Create Account</button>
+            </div>
+          </form>
+          
+          <div class="register-divider">
+            <span>OR</span>
+          </div>
+          
+          <div class="social-register">
+            <a href="#" class="social-register-btn">
+              <i class="bi bi-google"></i>
+            </a>
+            <a href="#" class="social-register-btn">
+              <i class="bi bi-facebook"></i>
+            </a>
+            <a href="#" class="social-register-btn">
+              <i class="bi bi-apple"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const icon = this.querySelector('i');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+      }
+    });
+  
+    // Password validation
+    const passwordInput = document.getElementById('password');
+    const requirements = document.querySelectorAll('.password-requirement i');
+  
+    passwordInput.addEventListener('input', function() {
+      const password = this.value;
+      
+      // Check length
+      if (password.length >= 8) {
+        requirements[0].classList.replace('bi-circle', 'bi-check-circle-fill');
+        requirements[0].classList.add('text-success');
+      } else {
+        requirements[0].classList.replace('bi-check-circle-fill', 'bi-circle');
+        requirements[0].classList.remove('text-success');
+      }
+      
+      // Check uppercase
+      if (/[A-Z]/.test(password)) {
+        requirements[1].classList.replace('bi-circle', 'bi-check-circle-fill');
+        requirements[1].classList.add('text-success');
+      } else {
+        requirements[1].classList.replace('bi-check-circle-fill', 'bi-circle');
+        requirements[1].classList.remove('text-success');
+      }
+      
+      // Check number
+      if (/[0-9]/.test(password)) {
+        requirements[2].classList.replace('bi-circle', 'bi-check-circle-fill');
+        requirements[2].classList.add('text-success');
+      } else {
+        requirements[2].classList.replace('bi-check-circle-fill', 'bi-circle');
+        requirements[2].classList.remove('text-success');
+      }
+      
+      // Check special character
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        requirements[3].classList.replace('bi-circle', 'bi-check-circle-fill');
+        requirements[3].classList.add('text-success');
+      } else {
+        requirements[3].classList.replace('bi-check-circle-fill', 'bi-circle');
+        requirements[3].classList.remove('text-success');
+      }
+    });
+  
+    // Handle form submission
+    document.getElementById('registrationForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form from submitting
+  
+      // Get form values
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+  
+      // Check if passwords match
+      if (password !== confirmPassword) {
+        showNotification('Passwords do not match!', 'error');
+        return;
+      }
+  
+      // Create user object
+      const user = {
+        firstName,
+        lastName,
+        email,
+        password,
+      };
+  
+      // Retrieve existing users from localStorage or initialize an empty array
+      let users = JSON.parse(localStorage.getItem('users')) || [];
+  
+      // Check if the user already exists
+      const userExists = users.some(u => u.email === email);
+      if (userExists) {
+        showNotification('User with this email already exists!', 'error');
+        return;
+      }
+  
+      // Add the new user to the list
+      users.push(user);
+  
+      // Save the updated list back to localStorage
+      localStorage.setItem('users', JSON.stringify(users));
+  
+      // Show success notification
+      showNotification('Account created successfully!', 'success');
+  
+      // Optionally, redirect to another page
+      window.location.href = 'login.html';
+    });
+  
+    // Function to show notifications
+    function showNotification(message, type) {
+      const toast = document.getElementById('notificationToast');
+      const toastBody = toast.querySelector('.toast-body');
+      const toastHeader = toast.querySelector('.toast-header');
+  
+      // Set message and style based on type
+      toastBody.textContent = message;
+      toast.classList.remove('toast-success', 'toast-error');
+      toast.classList.add(`toast-${type}`);
+  
+      // Show the toast
+      const bootstrapToast = new bootstrap.Toast(toast);
+      bootstrapToast.show();
+    }
+  </script>
+</body>
+</html>
