@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Destinations</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .highlight-enter {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    .highlight-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 300ms ease-in;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 flex items-center">
+      <i data-lucide="map-pin" class="mr-3"></i> My Destinations
+    </h1>
+
+    <!-- Add New Destination Section -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Add New Destination</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <input 
+          type="text"
+          id="destinationName"
+          placeholder="Destination Name"
+          class="border p-2 rounded"
+        />
+        <select 
+          id="destinationType"
+          class="border p-2 rounded"
+        >
+          <option value="">Select Type</option>
+          <option value="City">City</option>
+          <option value="Beach">Beach</option>
+          <option value="Mountain">Mountain</option>
+          <option value="Historical">Historical</option>
+        </select>
+        <input 
+          type="date"
+          id="visitedDate"
+          class="border p-2 rounded"
+        />
+      </div>
+      <textarea 
+        id="destinationNotes"
+        placeholder="Destination Notes"
+        class="w-full border p-2 rounded mt-4"
+        rows="3"
+      ></textarea>
+      <button 
+        id="addDestinationBtn"
+        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded flex items-center"
+      >
+        <i data-lucide="plus-circle" class="mr-2"></i> Add Destination
+      </button>
+    </div>
+
+    <!-- Destinations Grid -->
+    <div id="destinationsContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Destinations will be added here dynamically -->
+    </div>
+  </div>
+
+  <!-- Destination Details Modal -->
+  <div id="destinationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-8 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <h2 id="modalTitle" class="text-2xl font-bold mb-4"></h2>
+      
+      <!-- Destination Info Edit Section -->
+      <div class="mb-6">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-2">Destination Name</label>
+            <input 
+              type="text"
+              id="editDestinationName"
+              class="w-full border p-2 rounded"
+            />
+          </div>
+          <div>
+            <label class="block mb-2">Type</label>
+            <select 
+              id="editDestinationType"
+              class="w-full border p-2 rounded"
+            >
+              <option value="City">City</option>
+              <option value="Beach">Beach</option>
+              <option value="Mountain">Mountain</option>
+              <option value="Historical">Historical</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="block mb-2">Visited Date</label>
+          <input 
+            type="date"
+            id="editVisitedDate"
+            class="w-full border p-2 rounded"
+          />
+        </div>
+        <div class="mt-4">
+          <label class="block mb-2">Notes</label>
+          <textarea 
+            id="editDestinationNotes"
+            class="w-full border p-2 rounded"
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Highlights Section -->
+      <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-4">Destination Highlights</h3>
+        
+        <!-- Add Highlight -->
+        <div class="flex mb-4">
+          <input 
+            type="text"
+            id="newHighlightInput"
+            placeholder="Add a highlight"
+            class="flex-grow border p-2 rounded mr-2"
+          />
+          <button 
+            id="addHighlightBtn"
+            class="bg-green-500 text-white px-4 py-2 rounded"
+          >
+            Add
+          </button>
+        </div>
+
+        <!-- Highlights List -->
+        <div id="highlightsContainer" class="space-y-2">
+          <!-- Highlights will be added here dynamically -->
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-4 mt-6">
+        <button 
+          id="closeModalBtn"
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+        >
+          Close
+        </button>
+        <button id="saveChangesBtn" class="bg-green-500 text-white px-4 py-2 rounded">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // State management
+    let destinations = [
+      { 
+        id: 1, 
+        name: 'Tokyo, Japan', 
+        type: 'City', 
+        visitedDate: '2023-05-15',
+        notes: 'Amazing cherry blossom season!',
+        highlights: ['Tokyo Tower', 'Shibuya Crossing', 'Senso-ji Temple']
+      },
+      { 
+        id: 2, 
+        name: 'Bali, Indonesia', 
+        type: 'Beach', 
+        visitedDate: '2022-11-20',
+        notes: 'Incredible beaches and culture',
+        highlights: ['Ubud Monkey Forest', 'Tanah Lot Temple', 'Uluwatu Beach']
+      }
+    ];
+
+    let selectedDestination = null;
+
+    // DOM Elements
+    const destinationsContainer = document.getElementById('destinationsContainer');
+    const destinationModal = document.getElementById('destinationModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const highlightsContainer = document.getElementById('highlightsContainer');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    // Render functions
+    function renderDestinations() {
+      destinationsContainer.innerHTML = '';
+      destinations.forEach(destination => {
+        const destinationCard = document.createElement('div');
+        destinationCard.className = 'bg-white shadow-md rounded-lg p-4';
+        destinationCard.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">${destination.name}</h3>
+            <div class="flex space-x-2">
+              <button 
+                data-id="${destination.id}"
+                class="edit-btn text-blue-500 hover:bg-blue-100 p-1 rounded"
+              >
+                <i data-lucide="edit" class="w-5 h-5"></i>
+              </button>
+              <button 
+                data-id="${destination.id}"
+                class="delete-btn text-red-500 hover:bg-red-100 p-1 rounded"
+              >
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-gray-600 mb-2">
+            ${destination.type} - Visited: ${destination.visitedDate}
+          </p>
+          <p class="text-sm">${destination.notes}</p>
+        `;
+        destinationsContainer.appendChild(destinationCard);
+      });
+
+      // Add event listeners to buttons
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = parseInt(e.currentTarget.getAttribute('data-id'));
+          openDestinationDetails(id);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = parseInt(e.currentTarget.getAttribute('data-id'));
+          deleteDestination(id);
+        });
+      });
+
+      // Refresh icons
+      lucide.createIcons();
+    }
+
+    function renderModalContent() {
+      if (!selectedDestination) return;
+
+      modalTitle.textContent = `${selectedDestination.name} Details`;
+      
+      // Set form values
+      document.getElementById('editDestinationName').value = selectedDestination.name;
+      document.getElementById('editDestinationType').value = selectedDestination.type;
+      document.getElementById('editVisitedDate').value = selectedDestination.visitedDate;
+      document.getElementById('editDestinationNotes').value = selectedDestination.notes || '';
+      
+      // Render highlights
+      highlightsContainer.innerHTML = '';
+      if (selectedDestination.highlights) {
+        selectedDestination.highlights.forEach((highlight, index) => {
+          const highlightElement = document.createElement('div');
+          highlightElement.className = 'flex justify-between items-center bg-gray-100 p-2 rounded';
+          highlightElement.innerHTML = `
+            <span>${highlight}</span>
+            <button 
+              data-highlight="${highlight}"
+              class="delete-highlight-btn text-red-500 hover:bg-red-200 p-1 rounded"
+            >
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+          highlightsContainer.appendChild(highlightElement);
+        });
+      }
+
+      // Add event listeners to highlight delete buttons
+      document.querySelectorAll('.delete-highlight-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const highlight = e.currentTarget.getAttribute('data-highlight');
+          deleteHighlight(highlight);
+        });
+      });
+
+      // Refresh icons
+      lucide.createIcons();
+    }
+
+    // Business logic functions
+    function addDestination() {
+      const name = document.getElementById('destinationName').value;
+      const type = document.getElementById('destinationType').value;
+      const visitedDate = document.getElementById('visitedDate').value;
+      const notes = document.getElementById('destinationNotes').value;
+
+      if (name) {
+        const newId = destinations.length > 0 
+          ? Math.max(...destinations.map(d => d.id)) + 1 
+          : 1;
+        
+        const newDestination = {
+          id: newId,
+          name,
+          type,
+          visitedDate,
+          notes,
+          highlights: []
+        };
+
+        destinations.push(newDestination);
+        renderDestinations();
+
+        // Clear form
+        document.getElementById('destinationName').value = '';
+        document.getElementById('destinationType').value = '';
+        document.getElementById('visitedDate').value = '';
+        document.getElementById('destinationNotes').value = '';
+      }
+    }
+
+    function deleteDestination(id) {
+      if (confirm('Are you sure you want to delete this destination?')) {
+        destinations = destinations.filter(dest => dest.id !== id);
+        renderDestinations();
+        
+        // Close modal if the deleted destination was open
+        if (selectedDestination && selectedDestination.id === id) {
+          closeModal();
+        }
+      }
+    }
+
+    function openDestinationDetails(id) {
+      selectedDestination = destinations.find(dest => dest.id === id);
+      if (selectedDestination) {
+        renderModalContent();
+        destinationModal.classList.remove('hidden');
+        destinationModal.classList.add('flex');
+      }
+    }
+
+    function closeModal() {
+      destinationModal.classList.add('hidden');
+      destinationModal.classList.remove('flex');
+      selectedDestination = null;
+    }
+
+    function addHighlight() {
+      if (!selectedDestination) return;
+
+      const highlightInput = document.getElementById('newHighlightInput');
+      const highlight = highlightInput.value;
+
+      if (highlight) {
+        if (!selectedDestination.highlights) {
+          selectedDestination.highlights = [];
+        }
+
+        selectedDestination.highlights.push(highlight);
+        
+        // Update the main destinations array
+        destinations = destinations.map(dest => 
+          dest.id === selectedDestination.id ? selectedDestination : dest
+        );
+
+        renderModalContent();
+        highlightInput.value = '';
+      }
+    }
+
+    function deleteHighlight(highlightToDelete) {
+      if (!selectedDestination || !selectedDestination.highlights) return;
+
+      selectedDestination.highlights = selectedDestination.highlights.filter(
+        highlight => highlight !== highlightToDelete
+      );
+      
+      // Update the main destinations array
+      destinations = destinations.map(dest => 
+        dest.id === selectedDestination.id ? selectedDestination : dest
+      );
+
+      renderModalContent();
+    }
+
+    function saveChanges() {
+      if (!selectedDestination) return;
+
+      // Update the selected destination with form values
+      selectedDestination.name = document.getElementById('editDestinationName').value;
+      selectedDestination.type = document.getElementById('editDestinationType').value;
+      selectedDestination.visitedDate = document.getElementById('editVisitedDate').value;
+      selectedDestination.notes = document.getElementById('editDestinationNotes').value;
+
+      // Update the main destinations array
+      destinations = destinations.map(dest => 
+        dest.id === selectedDestination.id ? selectedDestination : dest
+      );
+
+      closeModal();
+      renderDestinations();
+    }
+
+    // Event listeners
+    document.getElementById('addDestinationBtn').addEventListener('click', addDestination);
+    document.getElementById('addHighlightBtn').addEventListener('click', addHighlight);
+    closeModalBtn.addEventListener('click', closeModal);
+    document.getElementById('saveChangesBtn').addEventListener('click', saveChanges);
+
+    // Initial render
+    renderDestinations();
+  </script>
+</body>
+</html>

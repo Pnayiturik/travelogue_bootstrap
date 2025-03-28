@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerary Planner</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .activity-enter {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    .activity-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 300ms ease-in;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Itinerary Planner</h1>
+
+    <!-- Create New Itinerary Section -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Create New Itinerary</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input 
+          type="text"
+          id="destinationInput"
+          placeholder="Destination"
+          class="border p-2 rounded"
+        />
+        <input 
+          type="date"
+          id="startDateInput"
+          class="border p-2 rounded"
+        />
+        <input 
+          type="date"
+          id="endDateInput"
+          class="border p-2 rounded"
+        />
+      </div>
+      <button 
+        id="createItineraryBtn"
+        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded flex items-center"
+      >
+        <i data-lucide="plus-circle" class="mr-2"></i> Create Itinerary
+      </button>
+    </div>
+
+    <!-- Itineraries List -->
+    <div id="itinerariesContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Itineraries will be added here dynamically -->
+    </div>
+  </div>
+
+  <!-- Itinerary Details Modal -->
+  <div id="itineraryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-8 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <h2 id="modalTitle" class="text-2xl font-bold mb-4"></h2>
+      
+      <!-- Add Day Section -->
+      <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Add Day</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input 
+            type="date"
+            id="dayDateInput"
+            class="border p-2 rounded"
+          />
+          <button id="addDayBtn" class="bg-green-500 text-white px-4 py-2 rounded">
+            Add Day
+          </button>
+        </div>
+      </div>
+
+      <!-- Day Details Container -->
+      <div id="daysContainer">
+        <!-- Days will be added here dynamically -->
+      </div>
+
+      <div class="flex justify-end space-x-4 mt-6">
+        <button 
+          id="closeModalBtn"
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+        >
+          Close
+        </button>
+        <button id="saveChangesBtn" class="bg-green-500 text-white px-4 py-2 rounded">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // State management
+    let itineraries = [
+      {
+        id: 1,
+        destination: 'Paris, France',
+        startDate: '2024-09-15',
+        endDate: '2024-09-22',
+        days: [
+          {
+            date: '2024-09-16',
+            activities: [
+              { time: '09:00', description: 'Eiffel Tower Visit' },
+              { time: '14:00', description: 'Louvre Museum Tour' }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let selectedItinerary = null;
+
+    // DOM Elements
+    const itinerariesContainer = document.getElementById('itinerariesContainer');
+    const itineraryModal = document.getElementById('itineraryModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const daysContainer = document.getElementById('daysContainer');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    // Render functions
+    function renderItineraries() {
+      itinerariesContainer.innerHTML = '';
+      itineraries.forEach(itinerary => {
+        const itineraryCard = document.createElement('div');
+        itineraryCard.className = 'bg-white shadow-md rounded-lg p-4';
+        itineraryCard.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">${itinerary.destination}</h3>
+            <div class="flex space-x-2">
+              <button 
+                data-id="${itinerary.id}"
+                class="edit-btn text-blue-500 hover:bg-blue-100 p-1 rounded"
+              >
+                <i data-lucide="edit" class="w-5 h-5"></i>
+              </button>
+              <button 
+                data-id="${itinerary.id}"
+                class="delete-btn text-red-500 hover:bg-red-100 p-1 rounded"
+              >
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-gray-600">
+            ${itinerary.startDate} - ${itinerary.endDate}
+          </p>
+        `;
+        itinerariesContainer.appendChild(itineraryCard);
+      });
+
+      // Add event listeners to buttons
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = parseInt(e.currentTarget.getAttribute('data-id'));
+          openItineraryDetails(id);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = parseInt(e.currentTarget.getAttribute('data-id'));
+          deleteItinerary(id);
+        });
+      });
+
+      // Refresh icons
+      lucide.createIcons();
+    }
+
+    function renderDayDetails(day, dayIndex) {
+      const dayElement = document.createElement('div');
+      dayElement.className = 'mb-6 p-4 border rounded';
+      dayElement.innerHTML = `
+        <h4 class="text-lg font-semibold mb-2">
+          Day ${dayIndex + 1} - ${day.date}
+        </h4>
+        
+        <!-- Add Activity Section -->
+        <div class="mb-4">
+          <input 
+            type="text"
+            id="activityDesc-${dayIndex}"
+            placeholder="Activity Description"
+            class="border p-2 rounded w-full mb-2"
+          />
+          <input 
+            type="time"
+            id="activityTime-${dayIndex}"
+            class="border p-2 rounded w-full"
+          />
+          <button 
+            data-dayindex="${dayIndex}"
+            class="add-activity-btn mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Add Activity
+          </button>
+        </div>
+
+        <!-- Activities List -->
+        <div id="activities-${dayIndex}" class="activities-container">
+          ${day.activities ? day.activities.map((activity, actIndex) => `
+            <div class="activity-item flex justify-between items-center p-2 bg-gray-100 rounded mb-2">
+              <span>${activity.time} - ${activity.description}</span>
+              <div>
+                <button data-dayindex="${dayIndex}" data-actindex="${actIndex}" class="edit-activity-btn text-blue-500 mr-2">Edit</button>
+                <button data-dayindex="${dayIndex}" data-actindex="${actIndex}" class="delete-activity-btn text-red-500">Delete</button>
+              </div>
+            </div>
+          `).join('') : ''}
+        </div>
+      `;
+      return dayElement;
+    }
+
+    function renderModalContent() {
+      if (!selectedItinerary) return;
+
+      modalTitle.textContent = `${selectedItinerary.destination} Itinerary`;
+      daysContainer.innerHTML = '';
+
+      selectedItinerary.days.forEach((day, dayIndex) => {
+        const dayElement = renderDayDetails(day, dayIndex);
+        daysContainer.appendChild(dayElement);
+      });
+
+      // Add event listeners to activity buttons
+      document.querySelectorAll('.add-activity-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const dayIndex = parseInt(e.currentTarget.getAttribute('data-dayindex'));
+          const descInput = document.getElementById(`activityDesc-${dayIndex}`);
+          const timeInput = document.getElementById(`activityTime-${dayIndex}`);
+          
+          if (descInput.value && timeInput.value) {
+            addActivityToDay(dayIndex, {
+              time: timeInput.value,
+              description: descInput.value
+            });
+            
+            // Clear inputs
+            descInput.value = '';
+            timeInput.value = '';
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-activity-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const dayIndex = parseInt(e.currentTarget.getAttribute('data-dayindex'));
+          const actIndex = parseInt(e.currentTarget.getAttribute('data-actindex'));
+          deleteActivity(dayIndex, actIndex);
+        });
+      });
+    }
+
+    // Business logic functions
+    function addItinerary() {
+      const destination = document.getElementById('destinationInput').value;
+      const startDate = document.getElementById('startDateInput').value;
+      const endDate = document.getElementById('endDateInput').value;
+
+      if (destination && startDate && endDate) {
+        const newId = itineraries.length > 0 
+          ? Math.max(...itineraries.map(i => i.id)) + 1 
+          : 1;
+        
+        const newItinerary = {
+          id: newId,
+          destination,
+          startDate,
+          endDate,
+          days: []
+        };
+
+        itineraries.push(newItinerary);
+        renderItineraries();
+
+        // Clear inputs
+        document.getElementById('destinationInput').value = '';
+        document.getElementById('startDateInput').value = '';
+        document.getElementById('endDateInput').value = '';
+      }
+    }
+
+    function deleteItinerary(id) {
+      if (confirm('Are you sure you want to delete this itinerary?')) {
+        itineraries = itineraries.filter(itin => itin.id !== id);
+        renderItineraries();
+        
+        // Close modal if the deleted itinerary was open
+        if (selectedItinerary && selectedItinerary.id === id) {
+          closeModal();
+        }
+      }
+    }
+
+    function openItineraryDetails(id) {
+      selectedItinerary = itineraries.find(itin => itin.id === id);
+      if (selectedItinerary) {
+        renderModalContent();
+        itineraryModal.classList.remove('hidden');
+        itineraryModal.classList.add('flex');
+      }
+    }
+
+    function closeModal() {
+      itineraryModal.classList.add('hidden');
+      itineraryModal.classList.remove('flex');
+      selectedItinerary = null;
+    }
+
+    function addDay() {
+      if (!selectedItinerary) return;
+
+      const dateInput = document.getElementById('dayDateInput');
+      const date = dateInput.value;
+
+      if (date) {
+        if (!selectedItinerary.days) {
+          selectedItinerary.days = [];
+        }
+
+        selectedItinerary.days.push({
+          date,
+          activities: []
+        });
+
+        // Update the main itineraries array
+        itineraries = itineraries.map(itin => 
+          itin.id === selectedItinerary.id ? selectedItinerary : itin
+        );
+
+        renderModalContent();
+        dateInput.value = '';
+      }
+    }
+
+    function addActivityToDay(dayIndex, activity) {
+      if (!selectedItinerary) return;
+
+      if (!selectedItinerary.days[dayIndex]) {
+        selectedItinerary.days[dayIndex] = { activities: [] };
+      }
+      
+      if (!selectedItinerary.days[dayIndex].activities) {
+        selectedItinerary.days[dayIndex].activities = [];
+      }
+      
+      selectedItinerary.days[dayIndex].activities.push(activity);
+      
+      // Update the main itineraries array
+      itineraries = itineraries.map(itin => 
+        itin.id === selectedItinerary.id ? selectedItinerary : itin
+      );
+
+      // Re-render the modal content
+      renderModalContent();
+    }
+
+    function deleteActivity(dayIndex, actIndex) {
+      if (!selectedItinerary || !selectedItinerary.days[dayIndex]) return;
+
+      selectedItinerary.days[dayIndex].activities.splice(actIndex, 1);
+      
+      // Update the main itineraries array
+      itineraries = itineraries.map(itin => 
+        itin.id === selectedItinerary.id ? selectedItinerary : itin
+      );
+
+      renderModalContent();
+    }
+
+    function saveChanges() {
+      // In this simple implementation, changes are already saved to the array
+      // In a real app, you might want to send data to a server here
+      closeModal();
+      renderItineraries();
+    }
+
+    // Event listeners
+    document.getElementById('createItineraryBtn').addEventListener('click', addItinerary);
+    document.getElementById('addDayBtn').addEventListener('click', addDay);
+    closeModalBtn.addEventListener('click', closeModal);
+    document.getElementById('saveChangesBtn').addEventListener('click', saveChanges);
+
+    // Initial render
+    renderItineraries();
+  </script>
+</body>
+</html>

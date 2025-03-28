@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        :root {
+            --primary-color: #3B82F6;
+            --background-color: #F3F4F6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            margin-left: 10px;
+        }
+
+        .settings-section {
+            display: grid;
+            gap: 15px;
+        }
+
+        .settings-section input,
+        .settings-section select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+        }
+
+        .settings-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .settings-section button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .settings-section button:hover {
+            background-color: #2563EB;
+        }
+
+        .toggle-switch {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #F9FAFB;
+            border-radius: 4px;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Profile Settings -->
+    <div class="card">
+        <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <h2>Profile Settings</h2>
+        </div>
+        <div class="settings-section">
+            <div class="form-grid">
+                <input type="text" id="profile-name" placeholder="Name" value="">
+                <input type="email" id="profile-email" placeholder="Email" value="">
+            </div>
+            <textarea id="profile-bio" placeholder="Bio" rows="4"></textarea>
+            <button id="save-profile">Save Profile</button>
+        </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="card">
+        <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <h2>Account Settings</h2>
+        </div>
+        <div class="settings-section">
+            <div>
+                <label>Language</label>
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                </select>
+            </div>
+            <div>
+                <label>Currency</label>
+                <select id="currency-select">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                </select>
+            </div>
+            <div>
+                <label>Time Zone</label>
+                <select id="timezone-select">
+                    <option value="UTC">UTC</option>
+                    <option value="EST">EST</option>
+                    <option value="PST">PST</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="card">
+        <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <h2>Security</h2>
+        </div>
+        <div class="settings-section">
+            <input type="password" id="current-password" placeholder="Current Password">
+            <input type="password" id="new-password" placeholder="New Password">
+            <button id="change-password">Change Password</button>
+        </div>
+    </div>
+
+    <!-- Notification Preferences -->
+    <div class="card">
+        <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <h2>Notification Preferences</h2>
+        </div>
+        <div class="settings-section">
+            <div class="toggle-switch">
+                <span>Email Notifications</span>
+                <label class="toggle">
+                    <input type="checkbox" id="email-notifications">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="toggle-switch">
+                <span>Push Notifications</span>
+                <label class="toggle">
+                    <input type="checkbox" id="push-notifications">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="toggle-switch">
+                <span>Marketing Notifications</span>
+                <label class="toggle">
+                    <input type="checkbox" id="marketing-notifications">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Profile Settings Management
+        const saveProfileBtn = document.getElementById('save-profile');
+        const profileName = document.getElementById('profile-name');
+        const profileEmail = document.getElementById('profile-email');
+        const profileBio = document.getElementById('profile-bio');
+
+        // Load saved profile
+        function loadProfile() {
+            const savedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            profileName.value = savedProfile.name || '';
+            profileEmail.value = savedProfile.email || '';
+            profileBio.value = savedProfile.bio || '';
+        }
+
+        // Save profile
+        saveProfileBtn.addEventListener('click', () => {
+            const profile = {
+                name: profileName.value,
+                email: profileEmail.value,
+                bio: profileBio.value
+            };
+
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            alert('Profile saved successfully!');
+        });
+
+        // Account Settings Management
+        const languageSelect = document.getElementById('language-select');
+        const currencySelect = document.getElementById('currency-select');
+        const timezoneSelect = document.getElementById('timezone-select');
+
+        // Load saved account settings
+        function loadAccountSettings() {
+            const savedSettings = JSON.parse(localStorage.getItem('accountSettings') || '{}');
+            languageSelect.value = savedSettings.language || 'en';
+            currencySelect.value = savedSettings.currency || 'USD';
+            timezoneSelect.value = savedSettings.timezone || 'UTC';
+        }
+
+        // Save account settings on change
+        [languageSelect, currencySelect, timezoneSelect].forEach(select => {
+            select.addEventListener('change', () => {
+                const settings = {
+                    language: languageSelect.value,
+                    currency: currencySelect.value,
+                    timezone: timezoneSelect.value
+                };
+                localStorage.setItem('accountSettings', JSON.stringify(settings));
+            });
+        });
+
+        // Security Settings
+        const changePasswordBtn = document.getElementById('change-password');
+        const currentPasswordInput = document.getElementById('current-password');
+        const newPasswordInput = document.getElementById('new-password');
+
+        changePasswordBtn.addEventListener('click', () => {
+            const currentPassword = currentPasswordInput.value;
+            const newPassword = newPasswordInput.value;
+
+            // Basic validation
+            if (currentPassword && newPassword) {
+                // In a real app, you'd send this to a backend for validation
+                alert('Password changed successfully!');
+                
+                // Clear password fields
+                currentPasswordInput.value = '';
+                newPasswordInput.value = '';
+            } else {
+                alert('Please enter both current and new passwords');
+            }
+        });
+
+        // Notification Preferences
+        const emailNotifications = document.getElementById('email-notifications');
+        const pushNotifications = document.getElementById('push-notifications');
+        const marketingNotifications = document.getElementById('marketing-notifications');
+
+        // Load saved notification preferences
+        function loadNotificationPreferences() {
+            const savedPreferences = JSON.parse(localStorage.getItem('notificationPreferences') || '{}');
+            emailNotifications.checked = savedPreferences.email || false;
+            pushNotifications.checked = savedPreferences.push || false;
+            marketingNotifications.checked = savedPreferences.marketing || false;
+        }
+
+        // Save notification preferences
+        [emailNotifications, pushNotifications, marketingNotifications].forEach(toggle => {
+            toggle.addEventListener('change', () => {
+                const preferences = {
+                    email: emailNotifications.checked,
+                    push: pushNotifications.checked,
+                    marketing: marketingNotifications.checked
+                };
+                localStorage.setItem('notificationPreferences', JSON.stringify(preferences));
+            });
+        });
+
+        // Load all settings on page load
+        loadProfile();
+        loadAccountSettings();
+        loadNotificationPreferences();
+    </script>
+</body>
+</html>
