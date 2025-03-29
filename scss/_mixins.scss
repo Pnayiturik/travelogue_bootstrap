@@ -1,0 +1,11 @@
+// Mixin for transitions
+@mixin transition($properties...) {
+    transition: $properties $transition-speed ease-in;
+}
+
+// Mixin for flexbox centering
+@mixin flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

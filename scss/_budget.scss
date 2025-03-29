@@ -1,0 +1,132 @@
+@use 'variables' as *;
+@use 'sass:color';
+
+
+:root {
+    --primary-color: #{$primary-color};
+    --secondary-color: #{$secondary-color};
+    --background-color: #{$background-color};
+    --text-color: #{$text-color};
+    --accent-color: #{$accent-color};
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: $background-color;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+
+    h2 {
+        font-size: 1.25rem;
+        margin-left: 10px;
+    }
+}
+
+.budget-indicators {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.budget-indicator {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+
+    .label {
+        color: #6B7280;
+        font-size: 0.875rem;
+        margin-bottom: 5px;
+    }
+
+    .value {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+}
+
+.budget-progress {
+    width: 100%;
+    height: 10px;
+    background-color: #E5E7EB;
+    border-radius: 5px;
+    margin-top: 10px;
+
+    .budget-progress-fill {
+        height: 100%;
+        background-color: $primary-color;
+        border-radius: 5px;
+    }
+}
+
+.initial-budget-form,
+.expense-form {
+    display: flex;
+    gap: 10px;
+
+    input,
+    select,
+    button {
+        padding: 10px;
+        border: 1px solid #D1D5DB;
+        border-radius: 4px;
+    }
+
+    button {
+        background-color: $primary-color;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: color.adjust($primary-color, $lightness: -10%);
+        }
+    }
+}
+
+.expense-history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+// Category Colors
+.bg-red-100 { background-color: #FEE2E2; color: #B91C1C; }
+.bg-blue-100 { background-color: #DBEAFE; color: #1E40AF; }
+.bg-green-100 { background-color: #D1FAE5; color: #047857; }
+.bg-purple-100 { background-color: #EDE9FE; color: #5B21B6; }
+.bg-gray-100 { background-color: #F3F4F6; color: #374151; }
+
+#budget-section,
+#expense-section {
+    display: none;
+}
