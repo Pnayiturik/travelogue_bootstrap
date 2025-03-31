@@ -189,6 +189,38 @@
             text-decoration: line-through;
             margin-right: 8px;
         }
+        
+        .no-tours-found {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .filter-tag {
+            background-color: var(--light-color);
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .filter-tag-remove {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        
+        .active-filters {
+            margin-bottom: 20px;
+        }
+        
+        .sort-options {
+            margin-bottom: 20px;
+        }
     </style>
    
 </head>
@@ -239,47 +271,93 @@
             <div class="row align-items-center">
                 <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
                     <label class="form-label">Destination</label>
-                    <select class="form-select">
-                        <option selected>All Destinations</option>
-                        <option>Europe</option>
-                        <option>Asia</option>
-                        <option>America</option>
-                        <option>Africa</option>
+                    <select class="form-select" id="destinationFilter">
+                        <option value="all" selected>All Destinations</option>
+                        <option value="Europe">Europe</option>
+                        <option value="Asia">Asia</option>
+                        <option value="America">America</option>
+                        <option value="Africa">Africa</option>
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
                     <label class="form-label">Duration</label>
-                    <select class="form-select">
-                        <option selected>Any Duration</option>
-                        <option>1-3 Days</option>
-                        <option>4-7 Days</option>
-                        <option>8-14 Days</option>
-                        <option>15+ Days</option>
+                    <select class="form-select" id="durationFilter">
+                        <option value="all" selected>Any Duration</option>
+                        <option value="1-3">1-3 Days</option>
+                        <option value="4-7">4-7 Days</option>
+                        <option value="8-14">8-14 Days</option>
+                        <option value="15+">15+ Days</option>
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
                     <label class="form-label">Price Range</label>
-                    <select class="form-select">
-                        <option selected>Any Price</option>
-                        <option>$0 - $500</option>
-                        <option>$500 - $1000</option>
-                        <option>$1000 - $2000</option>
-                        <option>$2000+</option>
+                    <select class="form-select" id="priceFilter">
+                        <option value="all" selected>Any Price</option>
+                        <option value="0-500">$0 - $500</option>
+                        <option value="500-1000">$500 - $1000</option>
+                        <option value="1000-2000">$1000 - $2000</option>
+                        <option value="2000+">$2000+</option>
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
                     <label class="form-label">&nbsp;</label>
-                    <button class="btn btn-primary w-100">Filter Results</button>
+                    <button class="btn btn-primary w-100" id="applyFiltersBtn">Filter Results</button>
+                </div>
+            </div>
+            
+            <!-- Sort Options -->
+            <div class="row mt-3">
+                <div class="col-12 sort-options">
+                    <label class="form-label me-2">Sort by:</label>
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="sortOptions" id="sortDefault" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="sortDefault">Default</label>
+                        
+                        <input type="radio" class="btn-check" name="sortOptions" id="sortPriceLow" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="sortPriceLow">Price (Low to High)</label>
+                        
+                        <input type="radio" class="btn-check" name="sortOptions" id="sortPriceHigh" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="sortPriceHigh">Price (High to Low)</label>
+                        
+                        <input type="radio" class="btn-check" name="sortOptions" id="sortDuration" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="sortDuration">Duration</label>
+                        
+                        <input type="radio" class="btn-check" name="sortOptions" id="sortRating" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="sortRating">Rating</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Filters -->
+            <div class="row mt-3">
+                <div class="col-12 active-filters">
+                    <label class="form-label me-2">Active filters:</label>
+                    <div id="activeFiltersContainer">
+                        <!-- Active filters will be displayed here -->
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Tours Section -->
-        <h2 class="mb-4">Available Tours <span class="badge bg-primary rounded-pill">42 tours</span></h2>
+        <h2 class="mb-4">Available Tours <span class="badge bg-primary rounded-pill" id="tourCount">6 tours</span></h2>
         
-        <div class="row">
+        <div class="no-tours-found">
+            <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+            <h3>No tours found matching your criteria</h3>
+            <p class="text-muted">Try adjusting your filters to find more options</p>
+            <button class="btn btn-primary mt-3" id="resetFiltersBtn">Reset All Filters</button>
+        </div>
+        
+        <div class="row" id="toursContainer">
             <!-- Tour 1 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-4 tour-item" 
+                 data-destination="Europe" 
+                 data-duration="5" 
+                 data-price="960" 
+                 data-rating="4.5"
+                 data-featured="true"
+                 data-discount="20">
                 <div class="tour-card">
                     <div class="position-relative">
                         <img src="https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/14235/production/_100058428_mediaitem100058424.jpg" alt="Paris" class="tour-img w-100">
@@ -315,7 +393,11 @@
             </div>
             
             <!-- Tour 2 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-4 tour-item" 
+                 data-destination="Europe" 
+                 data-duration="4" 
+                 data-price="850" 
+                 data-rating="4.0">
                 <div class="tour-card">
                     <div class="position-relative">
                         <img src="https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/14235/production/_100058428_mediaitem100058424.jpg" alt="Rome" class="tour-img w-100">
@@ -348,7 +430,12 @@
             </div>
             
             <!-- Tour 3 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-4 tour-item" 
+                 data-destination="Asia" 
+                 data-duration="7" 
+                 data-price="1190" 
+                 data-rating="5.0"
+                 data-discount="15">
                 <div class="tour-card">
                     <div class="position-relative">
                         <img src="https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/14235/production/_100058428_mediaitem100058424.jpg" alt="Bali" class="tour-img w-100">
@@ -383,7 +470,11 @@
             </div>
             
             <!-- Tour 4 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-4 tour-item" 
+                 data-destination="America" 
+                 data-duration="5" 
+                 data-price="1150" 
+                 data-rating="4.0">
                 <div class="tour-card">
                     <div class="position-relative">
                         <img src="https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/14235/production/_100058428_mediaitem100058424.jpg" alt="New York" class="tour-img w-100">
@@ -416,7 +507,12 @@
             </div>
             
             <!-- Tour 5 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-4 tour-item" 
+                 data-destination="Asia" 
+                 data-duration="6" 
+                 data-price="1280" 
+                 data-rating="4.5"
+                 data-featured="true">
                 <div class="tour-card">
                     <div class="position-relative">
                         <img src="https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/14235/production/_100058428_mediaitem100058424.jpg" alt="Kyoto" class="tour-img w-100">
@@ -450,7 +546,12 @@
             </div>
             
             <!-- Tour 6 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-4 tour-item" 
+                 data-destination="Europe" 
+                 data-duration="8" 
+                 data-price="1200" 
+                 data-rating="5.0"
+                 data-discount="25">
                 <div class="tour-card">
                     <div class="position-relative">
                         <img src="https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/14235/production/_100058428_mediaitem100058424.jpg" alt="Santorini" class="tour-img w-100">
@@ -808,5 +909,273 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript for filtering functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all tour items
+            const tourItems = document.querySelectorAll('.tour-item');
+            const toursContainer = document.getElementById('toursContainer');
+            const noToursFound = document.querySelector('.no-tours-found');
+            const tourCount = document.getElementById('tourCount');
+            
+            // Filter elements
+            const destinationFilter = document.getElementById('destinationFilter');
+            const durationFilter = document.getElementById('durationFilter');
+            const priceFilter = document.getElementById('priceFilter');
+            const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+            const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+            const activeFiltersContainer = document.getElementById('activeFiltersContainer');
+            
+            // Sort options
+            const sortDefault = document.getElementById('sortDefault');
+            const sortPriceLow = document.getElementById('sortPriceLow');
+            const sortPriceHigh = document.getElementById('sortPriceHigh');
+            const sortDuration = document.getElementById('sortDuration');
+            const sortRating = document.getElementById('sortRating');
+            
+            // Current filters
+            let currentFilters = {
+                destination: 'all',
+                duration: 'all',
+                price: 'all'
+            };
+            
+            // Apply filters when button is clicked
+            applyFiltersBtn.addEventListener('click', applyFilters);
+            
+            // Reset all filters
+            resetFiltersBtn.addEventListener('click', resetFilters);
+            
+            // Apply sorting when sort options change
+            sortDefault.addEventListener('change', applySorting);
+            sortPriceLow.addEventListener('change', applySorting);
+            sortPriceHigh.addEventListener('change', applySorting);
+            sortDuration.addEventListener('change', applySorting);
+            sortRating.addEventListener('change', applySorting);
+            
+            // Function to apply filters
+            function applyFilters() {
+                // Get current filter values
+                currentFilters = {
+                    destination: destinationFilter.value,
+                    duration: durationFilter.value,
+                    price: priceFilter.value
+                };
+                
+                // Update active filters display
+                updateActiveFilters();
+                
+                // Filter tours
+                let visibleCount = 0;
+                
+                tourItems.forEach(item => {
+                    const destination = item.dataset.destination;
+                    const duration = parseInt(item.dataset.duration);
+                    const price = parseFloat(item.dataset.price);
+                    
+                    // Check destination filter
+                    const destinationMatch = currentFilters.destination === 'all' || 
+                                           destination === currentFilters.destination;
+                    
+                    // Check duration filter
+                    let durationMatch = false;
+                    if (currentFilters.duration === 'all') {
+                        durationMatch = true;
+                    } else if (currentFilters.duration === '1-3') {
+                        durationMatch = duration >= 1 && duration <= 3;
+                    } else if (currentFilters.duration === '4-7') {
+                        durationMatch = duration >= 4 && duration <= 7;
+                    } else if (currentFilters.duration === '8-14') {
+                        durationMatch = duration >= 8 && duration <= 14;
+                    } else if (currentFilters.duration === '15+') {
+                        durationMatch = duration >= 15;
+                    }
+                    
+                    // Check price filter
+                    let priceMatch = false;
+                    if (currentFilters.price === 'all') {
+                        priceMatch = true;
+                    } else if (currentFilters.price === '0-500') {
+                        priceMatch = price >= 0 && price <= 500;
+                    } else if (currentFilters.price === '500-1000') {
+                        priceMatch = price > 500 && price <= 1000;
+                    } else if (currentFilters.price === '1000-2000') {
+                        priceMatch = price > 1000 && price <= 2000;
+                    } else if (currentFilters.price === '2000+') {
+                        priceMatch = price > 2000;
+                    }
+                    
+                    // Show or hide item based on filters
+                    if (destinationMatch && durationMatch && priceMatch) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Update tour count
+                tourCount.textContent = `${visibleCount} tours`;
+                
+                // Show no tours found message if no tours match filters
+                if (visibleCount === 0) {
+                    noToursFound.style.display = 'block';
+                    toursContainer.style.display = 'none';
+                } else {
+                    noToursFound.style.display = 'none';
+                    toursContainer.style.display = 'flex';
+                }
+                
+                // Apply sorting after filtering
+                applySorting();
+            }
+            
+            // Function to reset all filters
+            function resetFilters() {
+                destinationFilter.value = 'all';
+                durationFilter.value = 'all';
+                priceFilter.value = 'all';
+                sortDefault.checked = true;
+                
+                currentFilters = {
+                    destination: 'all',
+                    duration: 'all',
+                    price: 'all'
+                };
+                
+                // Clear active filters
+                activeFiltersContainer.innerHTML = '';
+                
+                // Show all tours
+                tourItems.forEach(item => {
+                    item.style.display = 'block';
+                });
+                
+                // Update tour count
+                tourCount.textContent = `${tourItems.length} tours`;
+                
+                // Hide no tours found message
+                noToursFound.style.display = 'none';
+                toursContainer.style.display = 'flex';
+                
+                // Apply default sorting
+                applySorting();
+            }
+            
+            // Function to update active filters display
+            function updateActiveFilters() {
+                activeFiltersContainer.innerHTML = '';
+                
+                // Destination filter
+                if (currentFilters.destination !== 'all') {
+                    const filterTag = createFilterTag('Destination', currentFilters.destination, 'destination');
+                    activeFiltersContainer.appendChild(filterTag);
+                }
+                
+                // Duration filter
+                if (currentFilters.duration !== 'all') {
+                    let durationText = '';
+                    switch(currentFilters.duration) {
+                        case '1-3': durationText = '1-3 Days'; break;
+                        case '4-7': durationText = '4-7 Days'; break;
+                        case '8-14': durationText = '8-14 Days'; break;
+                        case '15+': durationText = '15+ Days'; break;
+                    }
+                    const filterTag = createFilterTag('Duration', durationText, 'duration');
+                    activeFiltersContainer.appendChild(filterTag);
+                }
+                
+                // Price filter
+                if (currentFilters.price !== 'all') {
+                    let priceText = '';
+                    switch(currentFilters.price) {
+                        case '0-500': priceText = '$0 - $500'; break;
+                        case '500-1000': priceText = '$500 - $1000'; break;
+                        case '1000-2000': priceText = '$1000 - $2000'; break;
+                        case '2000+': priceText = '$2000+'; break;
+                    }
+                    const filterTag = createFilterTag('Price', priceText, 'price');
+                    activeFiltersContainer.appendChild(filterTag);
+                }
+            }
+            
+            // Function to create a filter tag
+            function createFilterTag(label, value, filterType) {
+                const filterTag = document.createElement('div');
+                filterTag.className = 'filter-tag';
+                
+                const tagText = document.createElement('span');
+                tagText.textContent = `${label}: ${value}`;
+                
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'filter-tag-remove';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.addEventListener('click', () => removeFilter(filterType));
+                
+                filterTag.appendChild(tagText);
+                filterTag.appendChild(removeBtn);
+                
+                return filterTag;
+            }
+            
+            // Function to remove a specific filter
+            function removeFilter(filterType) {
+                switch(filterType) {
+                    case 'destination':
+                        destinationFilter.value = 'all';
+                        currentFilters.destination = 'all';
+                        break;
+                    case 'duration':
+                        durationFilter.value = 'all';
+                        currentFilters.duration = 'all';
+                        break;
+                    case 'price':
+                        priceFilter.value = 'all';
+                        currentFilters.price = 'all';
+                        break;
+                }
+                
+                // Reapply filters
+                applyFilters();
+            }
+            
+            // Function to apply sorting
+            function applySorting() {
+                const visibleTours = Array.from(tourItems).filter(item => 
+                    item.style.display !== 'none'
+                );
+                
+                if (sortPriceLow.checked) {
+                    visibleTours.sort((a, b) => {
+                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    });
+                } else if (sortPriceHigh.checked) {
+                    visibleTours.sort((a, b) => {
+                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    });
+                } else if (sortDuration.checked) {
+                    visibleTours.sort((a, b) => {
+                        return parseInt(a.dataset.duration) - parseInt(b.dataset.duration);
+                    });
+                } else if (sortRating.checked) {
+                    visibleTours.sort((a, b) => {
+                        return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+                    });
+                } else {
+                    // Default sorting (original order)
+                    visibleTours.sort((a, b) => {
+                        return Array.from(tourItems).indexOf(a) - Array.from(tourItems).indexOf(b);
+                    });
+                }
+                
+                // Reorder tours in the container
+                toursContainer.innerHTML = '';
+                visibleTours.forEach(tour => {
+                    toursContainer.appendChild(tour);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
