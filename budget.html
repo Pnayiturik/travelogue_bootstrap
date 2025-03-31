@@ -4,417 +4,380 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Tracker</title>
-    <link rel="stylesheet" href="style.css">
-
-    <!--style>
-        :root {
-            --primary-color: #3B82F6;
-            --secondary-color: #10B981;
-            --background-color: #F3F4F6;
-            --text-color: #1F2937;
-            --accent-color: #6366F1;
-        }
-
+    <style>
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
-
         body {
-            background-color: var(--background-color);
+            margin: 0;
             padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: #f5f5f5;
         }
-
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
         .card {
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
-
-        .card-header {
+        .header {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
+            cursor: pointer;
         }
-
-        .card-header h2 {
-            font-size: 1.25rem;
-            margin-left: 10px;
+        .header .icon {
+            color: #4285f4;
+            margin-right: 10px;
+            transition: transform 0.3s;
         }
-
-        /* Budget Indicators */
-        .budget-indicators {
+        .header .icon.open {
+            transform: rotate(180deg);
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #3367d6;
+        }
+        .overview-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 10px;
         }
-
-        .budget-indicator {
+        .overview-item {
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 4px;
             text-align: center;
         }
-
-        .budget-indicator .label {
-            color: #6B7280;
-            font-size: 0.875rem;
+        .total-budget {
+            background-color: #e8f0fe;
+        }
+        .total-spent {
+            background-color: #e6f4ea;
+        }
+        .remaining-budget {
+            background-color: #fce8e6;
+        }
+        .label {
+            font-size: 14px;
+            color: #555;
             margin-bottom: 5px;
         }
-
-        .budget-indicator .value {
-            font-size: 1.25rem;
+        .value {
+            font-size: 24px;
             font-weight: bold;
         }
-
-        .budget-progress {
-            width: 100%;
+        .progress-bar {
             height: 10px;
-            background-color: #E5E7EB;
+            background-color: #e0e0e0;
             border-radius: 5px;
-            margin-top: 10px;
+            margin-top: 15px;
+            overflow: hidden;
         }
-
-        .budget-progress-fill {
+        .progress-fill {
             height: 100%;
-            background-color: var(--primary-color);
-            border-radius: 5px;
+            background-color: #4285f4;
+            width: 30%;
         }
-
-        /* Initial Budget Form */
-        .initial-budget-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .initial-budget-form input,
-        .initial-budget-form button {
-            padding: 10px;
-            border: 1px solid #D1D5DB;
-            border-radius: 4px;
-        }
-
-        .initial-budget-form button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .initial-budget-form button:hover {
-            background-color: #2563EB;
-        }
-
-        /* Expense Form */
-        .expense-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 10px;
-        }
-
-        .expense-form select,
-        .expense-form input,
-        .expense-form button {
-            padding: 10px;
-            border: 1px solid #D1D5DB;
-            border-radius: 4px;
-        }
-
-        .expense-form button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .expense-form button:hover {
-            background-color: #2563EB;
-        }
-
-        /* Expense History */
-        .expense-history {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
         .expense-item {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            border-radius: 4px;
+            align-items: center;
         }
-
-        /* Category Colors */
-        .bg-red-100 { background-color: #FEE2E2; color: #B91C1C; }
-        .bg-blue-100 { background-color: #DBEAFE; color: #1E40AF; }
-        .bg-green-100 { background-color: #D1FAE5; color: #047857; }
-        .bg-purple-100 { background-color: #EDE9FE; color: #5B21B6; }
-        .bg-gray-100 { background-color: #F3F4F6; color: #374151; }
-
-        /* Hide expense form until budget is set */
-        #budget-section,
-        #expense-section {
+        .expense-item .delete-btn {
+            background-color: transparent;
+            color: #888;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 5px;
+        }
+        .expense-item .delete-btn:hover {
+            color: #f44336;
+        }
+        .food {
+            background-color: #fce8e6;
+        }
+        .transport {
+            background-color: #e8f0fe;
+        }
+        .entertainment {
+            background-color: #e6f4ea;
+        }
+        .utilities {
+            background-color: #f3e8fd;
+        }
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper select {
+            appearance: none;
+        }
+        .select-wrapper:after {
+            content: "▼";
+            font-size: 12px;
+            top: 15px;
+            right: 10px;
+            position: absolute;
+            pointer-events: none;
+        }
+        .content {
+            display: block;
+        }
+        .hidden {
             display: none;
         }
-    </style-->
+        .expense-details {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
 </head>
 <body>
-    <div class="card" id="initial-budget-card">
-        <div class="card-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="20" x2="12" y2="10"></line>
-                <line x1="18" y1="20" x2="18" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="16"></line>
-            </svg>
-            <h2>Set Your Budget</h2>
-        </div>
-
-        <form class="initial-budget-form" id="initial-budget-form">
-            <input 
-                type="number" 
-                id="initial-budget-input" 
-                placeholder="Enter your total budget" 
-                min="1" 
-                step="0.01" 
-                required
-            >
-            <button type="submit">Set Budget</button>
-        </form>
-    </div>
-
-    <div class="card" id="budget-section">
-        <div class="card-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="20" x2="12" y2="10"></line>
-                <line x1="18" y1="20" x2="18" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="16"></line>
-            </svg>
-            <h2>Budget Overview</h2>
-        </div>
-
-        <div class="budget-indicators">
-            <div class="budget-indicator" style="background-color: #EFF6FF;">
-                <div class="label">Total Budget</div>
-                <div class="value" id="total-budget">$0</div>
+    <div class="container">
+        <div>
+            <div class="card">
+                <div class="header" id="budget-header">
+                    <span class="icon">▼</span>
+                    <h2>Set Your Budget</h2>
+                </div>
+                <div class="content" id="budget-content">
+                    <input type="number" id="budget-input" class="input-field" placeholder="Enter your total budget" />
+                    <button id="set-budget-btn" class="button">Set Budget</button>
+                </div>
             </div>
-            <div class="budget-indicator" style="background-color: #ECFDF5;">
-                <div class="label">Total Spent</div>
-                <div class="value" id="total-spent">$0</div>
+
+            <div class="card">
+                <div class="header" id="overview-header">
+                    <span class="icon">▼</span>
+                    <h2>Budget Overview</h2>
+                </div>
+                <div class="content" id="overview-content">
+                    <div class="overview-grid">
+                        <div class="overview-item total-budget">
+                            <div class="label">Total Budget</div>
+                            <div class="value" id="total-budget">$0</div>
+                        </div>
+                        <div class="overview-item total-spent">
+                            <div class="label">Total Spent</div>
+                            <div class="value" id="total-spent">$0</div>
+                        </div>
+                        <div class="overview-item remaining-budget">
+                            <div class="label">Remaining Budget</div>
+                            <div class="value" id="remaining-budget">$0</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
             </div>
-            <div class="budget-indicator" style="background-color: #FEF3F2;">
-                <div class="label">Remaining Budget</div>
-                <div class="value" id="remaining-budget">$0</div>
+
+            <div class="card">
+                <div class="header" id="add-expense-header">
+                    <span class="icon">▼</span>
+                    <h2>Add New Expense</h2>
+                </div>
+                <div class="content" id="add-expense-content">
+                    <div class="select-wrapper">
+                        <select id="category-select" class="input-field">
+                            <option value="">Select Category</option>
+                            <option value="Food">Food</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Utilities">Utilities</option>
+                        </select>
+                    </div>
+                    <input type="number" id="amount-input" class="input-field" placeholder="Amount" />
+                    <button id="add-expense-btn" class="button">Add</button>
+                </div>
             </div>
         </div>
 
-        <div class="budget-progress">
-            <div class="budget-progress-fill" id="budget-progress-bar" style="width: 0%;"></div>
-        </div>
-    </div>
-
-    <div class="card" id="expense-section">
-        <div class="card-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="20" x2="12" y2="10"></line>
-                <line x1="18" y1="20" x2="18" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="16"></line>
-            </svg>
-            <h2>Add New Expense</h2>
-        </div>
-
-        <form class="expense-form" id="expense-form">
-            <select id="expense-category" required>
-                <option value="">Select Category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Other">Other</option>
-            </select>
-            <input type="number" id="expense-amount" placeholder="Amount" required>
-            <button type="submit">Add Expense</button>
-        </form>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="20" x2="12" y2="10"></line>
-                <line x1="18" y1="20" x2="18" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="16"></line>
-            </svg>
-            <h2>Expense History</h2>
-        </div>
-
-        <div class="expense-history" id="expense-history">
-            <!-- Expenses will be dynamically added here -->
+        <div>
+            <div class="card">
+                <div class="header" id="expense-history-header">
+                    <span class="icon">▼</span>
+                    <h2>Expense History</h2>
+                </div>
+                <div class="content" id="expense-history-content">
+                    <div id="expense-items-container"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Get DOM elements
-        const initialBudgetForm = document.getElementById('initial-budget-form');
-        const initialBudgetInput = document.getElementById('initial-budget-input');
-        const budgetSection = document.getElementById('budget-section');
-        const expenseSection = document.getElementById('expense-section');
-        const initialBudgetCard = document.getElementById('initial-budget-card');
-
+        // DOM elements
+        const setBudgetBtn = document.getElementById('set-budget-btn');
+        const addExpenseBtn = document.getElementById('add-expense-btn');
+        const budgetInput = document.getElementById('budget-input');
+        const categorySelect = document.getElementById('category-select');
+        const amountInput = document.getElementById('amount-input');
         const totalBudgetEl = document.getElementById('total-budget');
         const totalSpentEl = document.getElementById('total-spent');
         const remainingBudgetEl = document.getElementById('remaining-budget');
-        const budgetProgressBar = document.getElementById('budget-progress-bar');
-        const expenseForm = document.getElementById('expense-form');
-        const expenseHistory = document.getElementById('expense-history');
+        const progressFill = document.getElementById('progress-fill');
+        const expenseItemsContainer = document.getElementById('expense-items-container');
+        
+        // Section headers
+        const budgetHeader = document.getElementById('budget-header');
+        const overviewHeader = document.getElementById('overview-header');
+        const addExpenseHeader = document.getElementById('add-expense-header');
+        const expenseHistoryHeader = document.getElementById('expense-history-header');
+        
+        const headers = [budgetHeader, overviewHeader, addExpenseHeader, expenseHistoryHeader];
+        const contents = [
+            document.getElementById('budget-content'),
+            document.getElementById('overview-content'),
+            document.getElementById('add-expense-content'),
+            document.getElementById('expense-history-content')
+        ];
 
-        let totalBudget = 0;
-        let expenses = [];
-
-        // Handle initial budget setting
-        initialBudgetForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Get budget amount
-            totalBudget = parseFloat(initialBudgetInput.value);
-            
-            // Update budget display
-            totalBudgetEl.textContent = `$${totalBudget.toLocaleString()}`;
-            remainingBudgetEl.textContent = `$${totalBudget.toLocaleString()}`;
-            
-            // Show budget and expense sections, hide initial budget input
-            budgetSection.style.display = 'block';
-            expenseSection.style.display = 'block';
-            initialBudgetCard.style.display = 'none';
-
-            // Load any saved expenses
-            loadSavedExpenses();
+        // Toggle sections
+        headers.forEach((header, index) => {
+            header.addEventListener('click', function() {
+                const icon = this.querySelector('.icon');
+                const content = contents[index];
+                
+                icon.classList.toggle('open');
+                content.classList.toggle('hidden');
+            });
         });
 
-        expenseForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const category = document.getElementById('expense-category').value;
-            const amount = parseFloat(document.getElementById('expense-amount').value);
+        // Budget data
+        let budgetData = {
+            totalBudget: 0,
+            expenses: []
+        };
 
-            if (category && amount) {
-                // Add expense
-                const expense = { 
-                    id: Date.now(), 
-                    category, 
-                    amount 
-                };
-                expenses.push(expense);
+        // Load data from localStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('budgetData');
+            if (savedData) {
+                budgetData = JSON.parse(savedData);
+                updateUI();
+            }
+        }
 
-                // Update budget calculations
-                const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-                const remainingBudget = totalBudget - totalSpent;
+        // Save data to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('budgetData', JSON.stringify(budgetData));
+        }
 
-                // Update UI
-                totalSpentEl.textContent = `$${totalSpent.toLocaleString()}`;
-                remainingBudgetEl.textContent = `$${remainingBudget.toLocaleString()}`;
-                budgetProgressBar.style.width = `${(totalSpent / totalBudget) * 100}%`;
+        // Delete expense
+        function deleteExpense(index) {
+            budgetData.expenses.splice(index, 1);
+            saveToLocalStorage();
+            updateUI();
+        }
 
-                // Add expense to history
-                const expenseItem = document.createElement('div');
-                expenseItem.classList.add('expense-item');
-                
-                // Color-code expense categories
-                const categoryColors = {
-                    'Food': 'bg-red-100',
-                    'Transport': 'bg-blue-100',
-                    'Entertainment': 'bg-green-100',
-                    'Utilities': 'bg-purple-100',
-                    'Other': 'bg-gray-100'
-                };
-                
-                expenseItem.classList.add(
-                    categoryColors[category] || categoryColors['Other']
-                );
-                
-                expenseItem.innerHTML = `
-                    <span>${category}</span>
-                    <span>$${amount.toLocaleString()}</span>
+        // Update the UI
+        function updateUI() {
+            // Update budget overview
+            totalBudgetEl.textContent = `$${budgetData.totalBudget}`;
+            
+            const totalSpent = budgetData.expenses.reduce((total, expense) => total + expense.amount, 0);
+            totalSpentEl.textContent = `$${totalSpent}`;
+            
+            const remainingBudget = budgetData.totalBudget - totalSpent;
+            remainingBudgetEl.textContent = `$${remainingBudget}`;
+            
+            // Update progress bar
+            const percentage = budgetData.totalBudget > 0 ? (totalSpent / budgetData.totalBudget) * 100 : 0;
+            progressFill.style.width = `${Math.min(percentage, 100)}%`;
+            
+            // Update expense history
+            expenseItemsContainer.innerHTML = '';
+            budgetData.expenses.forEach((expense, index) => {
+                const expenseEl = document.createElement('div');
+                expenseEl.className = `expense-item ${expense.category.toLowerCase()}`;
+                expenseEl.innerHTML = `
+                    <div class="expense-details">
+                        <div>${expense.category}</div>
+                        <div>$${expense.amount}</div>
+                    </div>
+                    <button class="delete-btn" data-index="${index}">×</button>
                 `;
-                expenseHistory.prepend(expenseItem);
+                expenseItemsContainer.appendChild(expenseEl);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteExpense(index);
+                });
+            });
+        }
 
-                // Reset form
-                expenseForm.reset();
-
-                // Save expenses
-                saveExpenses();
+        // Set budget
+        setBudgetBtn.addEventListener('click', function() {
+            const budgetValue = parseFloat(budgetInput.value);
+            if (!isNaN(budgetValue) && budgetValue > 0) {
+                budgetData.totalBudget = budgetValue;
+                saveToLocalStorage();
+                updateUI();
+                budgetInput.value = '';
+            } else {
+                alert('Please enter a valid budget amount');
             }
         });
 
-        // Optional: Load saved expenses from localStorage
-        function loadSavedExpenses() {
-            const savedBudget = localStorage.getItem('totalBudget');
-            const savedExpenses = localStorage.getItem('expenses');
-
-            if (savedBudget) {
-                totalBudget = parseFloat(savedBudget);
-                totalBudgetEl.textContent = `$${totalBudget.toLocaleString()}`;
-            }
-
-            if (savedExpenses) {
-                expenses = JSON.parse(savedExpenses);
-                
-                // Recalculate and update UI
-                const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-                totalSpentEl.textContent = `$${totalSpent.toLocaleString()}`;
-                remainingBudgetEl.textContent = `$${(totalBudget - totalSpent).toLocaleString()}`;
-                budgetProgressBar.style.width = `${(totalSpent / totalBudget) * 100}%`;
-
-                // Populate expense history
-                expenses.forEach(expense => {
-                    const expenseItem = document.createElement('div');
-                    expenseItem.classList.add('expense-item');
-                    
-                    const categoryColors = {
-                        'Food': 'bg-red-100',
-                        'Transport': 'bg-blue-100',
-                        'Entertainment': 'bg-green-100',
-                        'Utilities': 'bg-purple-100',
-                        'Other': 'bg-gray-100'
-                    };
-                    
-                    expenseItem.classList.add(
-                        categoryColors[expense.category] || categoryColors['Other']
-                    );
-                    
-                    expenseItem.innerHTML = `
-                        <span>${expense.category}</span>
-                        <span>$${expense.amount.toLocaleString()}</span>
-                    `;
-                    expenseHistory.prepend(expenseItem);
+        // Add expense
+        addExpenseBtn.addEventListener('click', function() {
+            const category = categorySelect.value;
+            const amount = parseFloat(amountInput.value);
+            
+            if (category && !isNaN(amount) && amount > 0) {
+                budgetData.expenses.push({
+                    category,
+                    amount
                 });
+                saveToLocalStorage();
+                updateUI();
+                
+                // Reset inputs
+                categorySelect.value = '';
+                amountInput.value = '';
+            } else {
+                alert('Please select a category and enter a valid amount');
             }
-        }
+        });
 
-        // Save expenses and budget to localStorage
-        function saveExpenses() {
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            localStorage.setItem('totalBudget', totalBudget.toString());
-        }
-
-        // Load saved data on page load
-        loadSavedExpenses();
-
-        // Show initial budget input card if no budget is set
-        if (!localStorage.getItem('totalBudget')) {
-            budgetSection.style.display = 'none';
-            expenseSection.style.display = 'none';
-            initialBudgetCard.style.display = 'block';
-        } else {
-            initialBudgetCard.style.display = 'none';
-            budgetSection.style.display = 'block';
-            expenseSection.style.display = 'block';
-        }
+        // Initialize
+        loadFromLocalStorage();
     </script>
 </body>
 </html>
