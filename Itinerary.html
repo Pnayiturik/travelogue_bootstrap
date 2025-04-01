@@ -16,6 +16,13 @@
       transform: translateY(0);
       transition: all 300ms ease-in;
     }
+    .loading-spinner {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -45,14 +52,26 @@
       </div>
       <button 
         id="createItineraryBtn"
-        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded flex items-center"
+        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center"
       >
+        <span id="createSpinner" class="loading-spinner hidden border-2 border-white border-t-transparent rounded-full w-5 h-5 mr-2"></span>
         <i data-lucide="plus-circle" class="mr-2"></i> Create Itinerary
       </button>
     </div>
 
+    <!-- Loading state for itineraries -->
+    <div id="loadingItineraries" class="text-center py-8">
+      <div class="loading-spinner border-4 border-blue-500 border-t-transparent rounded-full w-12 h-12 mx-auto mb-4"></div>
+      <p>Loading itineraries...</p>
+    </div>
+
+    <!-- Error state for itineraries -->
+    <div id="errorItineraries" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+      <p>Failed to load itineraries. Please try again later.</p>
+    </div>
+
     <!-- Itineraries List -->
-    <div id="itinerariesContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div id="itinerariesContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
       <!-- Itineraries will be added here dynamically -->
     </div>
   </div>
@@ -62,8 +81,19 @@
     <div class="bg-white p-8 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <h2 id="modalTitle" class="text-2xl font-bold mb-4"></h2>
       
+      <!-- Loading state for modal -->
+      <div id="modalLoading" class="hidden text-center py-8">
+        <div class="loading-spinner border-4 border-blue-500 border-t-transparent rounded-full w-12 h-12 mx-auto mb-4"></div>
+        <p>Loading itinerary details...</p>
+      </div>
+
+      <!-- Error state for modal -->
+      <div id="modalError" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <p id="modalErrorText">Failed to load itinerary details.</p>
+      </div>
+
       <!-- Add Day Section -->
-      <div class="mb-6">
+      <div id="dayInputSection" class="mb-6">
         <h3 class="text-xl font-semibold mb-2">Add Day</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input 
@@ -71,7 +101,8 @@
             id="dayDateInput"
             class="border p-2 rounded"
           />
-          <button id="addDayBtn" class="bg-green-500 text-white px-4 py-2 rounded">
+          <button id="addDayBtn" class="bg-green-500 text-white px-4 py-2 rounded flex items-center justify-center">
+            <span id="addDaySpinner" class="loading-spinner hidden border-2 border-white border-t-transparent rounded-full w-5 h-5 mr-2"></span>
             Add Day
           </button>
         </div>
@@ -89,7 +120,8 @@
         >
           Close
         </button>
-        <button id="saveChangesBtn" class="bg-green-500 text-white px-4 py-2 rounded">
+        <button id="saveChangesBtn" class="bg-green-500 text-white px-4 py-2 rounded flex items-center justify-center">
+          <span id="saveSpinner" class="loading-spinner hidden border-2 border-white border-t-transparent rounded-full w-5 h-5 mr-2"></span>
           Save Changes
         </button>
       </div>
@@ -100,33 +132,272 @@
     // Initialize Lucide icons
     lucide.createIcons();
 
-    // State management
-    let itineraries = [
-      {
-        id: 1,
-        destination: 'Paris, France',
-        startDate: '2024-09-15',
-        endDate: '2024-09-22',
-        days: [
-          {
-            date: '2024-09-16',
-            activities: [
-              { time: '09:00', description: 'Eiffel Tower Visit' },
-              { time: '14:00', description: 'Louvre Museum Tour' }
-            ]
-          }
-        ]
-      }
-    ];
+    // Mock API configuration
+    const API_BASE_URL = 'https://mock-api.example.com/itineraries';
+    const MOCK_API_DELAY = 500; // Simulate network delay in ms
 
+    // State management
+    let itineraries = [];
     let selectedItinerary = null;
 
     // DOM Elements
     const itinerariesContainer = document.getElementById('itinerariesContainer');
+    const loadingItineraries = document.getElementById('loadingItineraries');
+    const errorItineraries = document.getElementById('errorItineraries');
     const itineraryModal = document.getElementById('itineraryModal');
     const modalTitle = document.getElementById('modalTitle');
     const daysContainer = document.getElementById('daysContainer');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalLoading = document.getElementById('modalLoading');
+    const modalError = document.getElementById('modalError');
+    const dayInputSection = document.getElementById('dayInputSection');
+
+    // API Service Functions
+    async function fetchItineraries() {
+      try {
+        showLoading(itinerariesContainer, loadingItineraries);
+        errorItineraries.classList.add('hidden');
+
+        // Simulate API call with fetch
+        const response = await mockFetch(`${API_BASE_URL}`, {
+          method: 'GET'
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch itineraries');
+        }
+
+        const data = await response.json();
+        itineraries = data;
+        renderItineraries();
+      } catch (error) {
+        console.error('Error fetching itineraries:', error);
+        errorItineraries.classList.remove('hidden');
+        errorItineraries.querySelector('p').textContent = error.message;
+      } finally {
+        hideLoading(itinerariesContainer, loadingItineraries);
+      }
+    }
+
+    async function createItinerary(itineraryData) {
+      const createBtn = document.getElementById('createItineraryBtn');
+      const spinner = document.getElementById('createSpinner');
+      
+      try {
+        showLoading(createBtn, spinner);
+        
+        const response = await mockFetch(`${API_BASE_URL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(itineraryData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create itinerary');
+        }
+
+        const newItinerary = await response.json();
+        itineraries.push(newItinerary);
+        renderItineraries();
+        
+        // Clear form
+        document.getElementById('destinationInput').value = '';
+        document.getElementById('startDateInput').value = '';
+        document.getElementById('endDateInput').value = '';
+      } catch (error) {
+        console.error('Error creating itinerary:', error);
+        alert(`Error: ${error.message}`);
+      } finally {
+        hideLoading(createBtn, spinner);
+      }
+    }
+
+    async function updateItinerary(itineraryId, updatedData) {
+      const saveBtn = document.getElementById('saveChangesBtn');
+      const spinner = document.getElementById('saveSpinner');
+      
+      try {
+        showLoading(saveBtn, spinner);
+        
+        const response = await mockFetch(`${API_BASE_URL}/${itineraryId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update itinerary');
+        }
+
+        const updatedItinerary = await response.json();
+        itineraries = itineraries.map(itin => 
+          itin.id === updatedItinerary.id ? updatedItinerary : itin
+        );
+        
+        closeModal();
+        renderItineraries();
+      } catch (error) {
+        console.error('Error updating itinerary:', error);
+        showModalError(error.message);
+      } finally {
+        hideLoading(saveBtn, spinner);
+      }
+    }
+
+    async function deleteItinerary(itineraryId) {
+      if (!confirm('Are you sure you want to delete this itinerary?')) return;
+
+      try {
+        const response = await mockFetch(`${API_BASE_URL}/${itineraryId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete itinerary');
+        }
+
+        itineraries = itineraries.filter(itin => itin.id !== itineraryId);
+        renderItineraries();
+        
+        // Close modal if the deleted itinerary was open
+        if (selectedItinerary && selectedItinerary.id === itineraryId) {
+          closeModal();
+        }
+      } catch (error) {
+        console.error('Error deleting itinerary:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+
+    async function openItineraryDetails(id) {
+      try {
+        showModalLoading();
+        
+        // In a real app, we might fetch fresh data from the API
+        // const response = await mockFetch(`${API_BASE_URL}/${id}`);
+        // selectedItinerary = await response.json();
+        
+        // For this demo, we'll use the local state
+        selectedItinerary = itineraries.find(itin => itin.id === id);
+        
+        if (!selectedItinerary) {
+          throw new Error('Itinerary not found');
+        }
+
+        renderModalContent();
+        itineraryModal.classList.remove('hidden');
+        itineraryModal.classList.add('flex');
+      } catch (error) {
+        console.error('Error opening itinerary:', error);
+        showModalError(error.message);
+      } finally {
+        hideModalLoading();
+      }
+    }
+
+    async function addDayToItinerary() {
+      if (!selectedItinerary) return;
+
+      const dateInput = document.getElementById('dayDateInput');
+      const date = dateInput.value;
+      const addDayBtn = document.getElementById('addDayBtn');
+      const spinner = document.getElementById('addDaySpinner');
+
+      if (!date) return;
+
+      try {
+        showLoading(addDayBtn, spinner);
+        
+        const newDay = {
+          date,
+          activities: []
+        };
+
+        // In a real app, we would send this to the API
+        // For this demo, we'll update the local state
+        if (!selectedItinerary.days) {
+          selectedItinerary.days = [];
+        }
+
+        selectedItinerary.days.push(newDay);
+        
+        // Update the main itineraries array
+        itineraries = itineraries.map(itin => 
+          itin.id === selectedItinerary.id ? selectedItinerary : itin
+        );
+
+        renderModalContent();
+        dateInput.value = '';
+      } catch (error) {
+        console.error('Error adding day:', error);
+        showModalError(error.message);
+      } finally {
+        hideLoading(addDayBtn, spinner);
+      }
+    }
+
+    function addActivityToDay(dayIndex, activity) {
+      if (!selectedItinerary) return;
+
+      if (!selectedItinerary.days[dayIndex]) {
+        selectedItinerary.days[dayIndex] = { activities: [] };
+      }
+      
+      if (!selectedItinerary.days[dayIndex].activities) {
+        selectedItinerary.days[dayIndex].activities = [];
+      }
+      
+      selectedItinerary.days[dayIndex].activities.push(activity);
+      
+      // Re-render the modal content
+      renderModalContent();
+    }
+
+    function deleteActivity(dayIndex, actIndex) {
+      if (!selectedItinerary || !selectedItinerary.days[dayIndex]) return;
+
+      selectedItinerary.days[dayIndex].activities.splice(actIndex, 1);
+      renderModalContent();
+    }
+
+    // UI Helper Functions
+    function showLoading(container, spinner) {
+      if (container) container.disabled = true;
+      if (spinner) spinner.classList.remove('hidden');
+    }
+
+    function hideLoading(container, spinner) {
+      if (container) container.disabled = false;
+      if (spinner) spinner.classList.add('hidden');
+    }
+
+    function showModalLoading() {
+      daysContainer.classList.add('hidden');
+      dayInputSection.classList.add('hidden');
+      modalLoading.classList.remove('hidden');
+      modalError.classList.add('hidden');
+    }
+
+    function hideModalLoading() {
+      daysContainer.classList.remove('hidden');
+      dayInputSection.classList.remove('hidden');
+      modalLoading.classList.add('hidden');
+    }
+
+    function showModalError(message) {
+      modalError.classList.remove('hidden');
+      modalError.querySelector('p').textContent = message;
+    }
+
+    function closeModal() {
+      itineraryModal.classList.add('hidden');
+      itineraryModal.classList.remove('flex');
+      selectedItinerary = null;
+    }
 
     // Render functions
     function renderItineraries() {
@@ -174,6 +445,8 @@
         });
       });
 
+      // Show the container now that we have data
+      itinerariesContainer.classList.remove('hidden');
       // Refresh icons
       lucide.createIcons();
     }
@@ -213,7 +486,6 @@
             <div class="activity-item flex justify-between items-center p-2 bg-gray-100 rounded mb-2">
               <span>${activity.time} - ${activity.description}</span>
               <div>
-                <button data-dayindex="${dayIndex}" data-actindex="${actIndex}" class="edit-activity-btn text-blue-500 mr-2">Edit</button>
                 <button data-dayindex="${dayIndex}" data-actindex="${actIndex}" class="delete-activity-btn text-red-500">Delete</button>
               </div>
             </div>
@@ -263,138 +535,101 @@
       });
     }
 
-    // Business logic functions
-    function addItinerary() {
+    // Mock fetch function to simulate API calls
+    function mockFetch(url, options = {}) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Simulate API responses
+          const { method } = options;
+          const id = url.split('/').pop();
+          const body = options.body ? JSON.parse(options.body) : null;
+
+          // GET /itineraries
+          if (method === 'GET' && url === API_BASE_URL) {
+            resolve({
+              ok: true,
+              json: () => Promise.resolve([
+                {
+                  id: 1,
+                  destination: 'Paris, France',
+                  startDate: '2024-09-15',
+                  endDate: '2024-09-22',
+                  days: [
+                    {
+                      date: '2024-09-16',
+                      activities: [
+                        { time: '09:00', description: 'Eiffel Tower Visit' },
+                        { time: '14:00', description: 'Louvre Museum Tour' }
+                      ]
+                    }
+                  ]
+                }
+              ])
+            });
+          }
+          // POST /itineraries
+          else if (method === 'POST' && url === API_BASE_URL) {
+            const newItinerary = {
+              id: Math.max(...itineraries.map(i => i.id), 0) + 1,
+              ...body
+            };
+            resolve({
+              ok: true,
+              json: () => Promise.resolve(newItinerary)
+            });
+          }
+          // PUT /itineraries/:id
+          else if (method === 'PUT' && url.startsWith(`${API_BASE_URL}/`)) {
+            resolve({
+              ok: true,
+              json: () => Promise.resolve({
+                id: parseInt(id),
+                ...body
+              })
+            });
+          }
+          // DELETE /itineraries/:id
+          else if (method === 'DELETE' && url.startsWith(`${API_BASE_URL}/`)) {
+            resolve({
+              ok: true,
+              json: () => Promise.resolve({})
+            });
+          }
+          else {
+            reject(new Error('Not Found'));
+          }
+        }, MOCK_API_DELAY);
+      });
+    }
+
+    // Event listeners
+    document.getElementById('createItineraryBtn').addEventListener('click', () => {
       const destination = document.getElementById('destinationInput').value;
       const startDate = document.getElementById('startDateInput').value;
       const endDate = document.getElementById('endDateInput').value;
 
       if (destination && startDate && endDate) {
-        const newId = itineraries.length > 0 
-          ? Math.max(...itineraries.map(i => i.id)) + 1 
-          : 1;
-        
-        const newItinerary = {
-          id: newId,
+        createItinerary({
           destination,
           startDate,
           endDate,
           days: []
-        };
-
-        itineraries.push(newItinerary);
-        renderItineraries();
-
-        // Clear inputs
-        document.getElementById('destinationInput').value = '';
-        document.getElementById('startDateInput').value = '';
-        document.getElementById('endDateInput').value = '';
-      }
-    }
-
-    function deleteItinerary(id) {
-      if (confirm('Are you sure you want to delete this itinerary?')) {
-        itineraries = itineraries.filter(itin => itin.id !== id);
-        renderItineraries();
-        
-        // Close modal if the deleted itinerary was open
-        if (selectedItinerary && selectedItinerary.id === id) {
-          closeModal();
-        }
-      }
-    }
-
-    function openItineraryDetails(id) {
-      selectedItinerary = itineraries.find(itin => itin.id === id);
-      if (selectedItinerary) {
-        renderModalContent();
-        itineraryModal.classList.remove('hidden');
-        itineraryModal.classList.add('flex');
-      }
-    }
-
-    function closeModal() {
-      itineraryModal.classList.add('hidden');
-      itineraryModal.classList.remove('flex');
-      selectedItinerary = null;
-    }
-
-    function addDay() {
-      if (!selectedItinerary) return;
-
-      const dateInput = document.getElementById('dayDateInput');
-      const date = dateInput.value;
-
-      if (date) {
-        if (!selectedItinerary.days) {
-          selectedItinerary.days = [];
-        }
-
-        selectedItinerary.days.push({
-          date,
-          activities: []
         });
-
-        // Update the main itineraries array
-        itineraries = itineraries.map(itin => 
-          itin.id === selectedItinerary.id ? selectedItinerary : itin
-        );
-
-        renderModalContent();
-        dateInput.value = '';
+      } else {
+        alert('Please fill in all fields');
       }
-    }
+    });
 
-    function addActivityToDay(dayIndex, activity) {
-      if (!selectedItinerary) return;
-
-      if (!selectedItinerary.days[dayIndex]) {
-        selectedItinerary.days[dayIndex] = { activities: [] };
-      }
-      
-      if (!selectedItinerary.days[dayIndex].activities) {
-        selectedItinerary.days[dayIndex].activities = [];
-      }
-      
-      selectedItinerary.days[dayIndex].activities.push(activity);
-      
-      // Update the main itineraries array
-      itineraries = itineraries.map(itin => 
-        itin.id === selectedItinerary.id ? selectedItinerary : itin
-      );
-
-      // Re-render the modal content
-      renderModalContent();
-    }
-
-    function deleteActivity(dayIndex, actIndex) {
-      if (!selectedItinerary || !selectedItinerary.days[dayIndex]) return;
-
-      selectedItinerary.days[dayIndex].activities.splice(actIndex, 1);
-      
-      // Update the main itineraries array
-      itineraries = itineraries.map(itin => 
-        itin.id === selectedItinerary.id ? selectedItinerary : itin
-      );
-
-      renderModalContent();
-    }
-
-    function saveChanges() {
-      // In this simple implementation, changes are already saved to the array
-      // In a real app, you might want to send data to a server here
-      closeModal();
-      renderItineraries();
-    }
-
-    // Event listeners
-    document.getElementById('createItineraryBtn').addEventListener('click', addItinerary);
-    document.getElementById('addDayBtn').addEventListener('click', addDay);
+    document.getElementById('addDayBtn').addEventListener('click', addDayToItinerary);
     closeModalBtn.addEventListener('click', closeModal);
-    document.getElementById('saveChangesBtn').addEventListener('click', saveChanges);
+    document.getElementById('saveChangesBtn').addEventListener('click', () => {
+      if (selectedItinerary) {
+        updateItinerary(selectedItinerary.id, selectedItinerary);
+      }
+    });
 
-    // Initial render
-    renderItineraries();
+    // Initial load
+    fetchItineraries();
   </script>
 </body>
 </html>
